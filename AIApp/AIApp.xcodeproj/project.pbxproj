@@ -158,7 +158,7 @@
 			);
 			inputPaths = (
 			);
-			name = "Copy Brain.mlmodelc into bundle";
+			name = "Embed Brain (Core ML + vocab)";
 			outputFileListPaths = (
 			);
 			outputPaths = (

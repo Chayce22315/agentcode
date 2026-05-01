@@ -11,6 +11,12 @@ struct ContentView: View {
     @State private var draft: String = ""
     @FocusState private var composerFocused: Bool
 
+    private var buildLabel: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "v\(v) (\(b))"
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -44,6 +50,18 @@ struct ContentView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Assistant")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(buildLabel)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text(brain.isBrainReady ? "brain OK" : "brain missing")
+                            .font(.caption2)
+                            .foregroundStyle(brain.isBrainReady ? .green : .orange)
+                    }
+                }
+            }
         }
     }
 

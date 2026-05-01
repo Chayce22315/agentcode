@@ -15,22 +15,36 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        [self loadVocabularyIfNeeded];
-        NSURL *url = [[NSBundle mainBundle] URLForResource:@"Brain" withExtension:@"mlmodelc"];
-        if (url == nil) {
-            url = [[NSBundle mainBundle] URLForResource:@"Brain" withExtension:@"mlpackage"];
-        }
-        if (url == nil) {
-            return self;
-        }
-        NSError *error = nil;
-        MLModelConfiguration *cfg = [[MLModelConfiguration alloc] init];
-        _model = [MLModel modelWithContentsOfURL:url configuration:cfg error:&error];
-        if (_model == nil) {
-            NSLog(@"BrainEngine: failed to load model: %@", error);
-        }
+        [self loadModelIfNeeded];
     }
     return self;
+}
+
+/// Loads Brain.mlmodelc after vocabulary (needs JSON first for correct prediction input shape).
+- (void)loadModelIfNeeded {
+    if (_model != nil) {
+        return;
+    }
+    [self loadVocabularyIfNeeded];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"Brain" withExtension:@"mlmodelc"];
+    if (url == nil) {
+        url = [[NSBundle mainBundle] URLForResource:@"Brain" withExtension:@"mlpackage"];
+    }
+    if (url == nil) {
+        NSLog(@"BrainEngine: Brain.mlmodelc not in bundle");
+        return;
+    }
+    NSError *error = nil;
+    MLModelConfiguration *cfg = [[MLModelConfiguration alloc] init];
+    _model = [MLModel modelWithContentsOfURL:url configuration:cfg error:&error];
+    if (_model == nil) {
+        NSLog(@"BrainEngine: failed to load model: %@", error);
+    }
+}
+
+- (BOOL)isReady {
+    [self loadModelIfNeeded];
+    return _model != nil && _tokenToCol != nil;
 }
 
 - (void)loadVocabularyIfNeeded {
@@ -82,15 +96,19 @@
     _tokenToCol = map;
 }
 
-/// Matches sklearn CountVectorizer default tokenization for training export (same regex + ngrams).
+/// Matches sklearn CountVectorizer tokenization. Strips Python's (?u) prefix — NSRegularExpression does not accept it.
 - (NSArray<NSString *> *)tokensFromText:(NSString *)text {
     NSString *work = _lowercase ? [text lowercaseString] : text;
+    NSString *pat = _tokenPattern ?: @"(?u)\\b\\w\\w+\\b";
+    if ([pat hasPrefix:@"(?u)"]) {
+        pat = [pat substringFromIndex:4];
+    }
     NSError *error = nil;
-    NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:_tokenPattern
-                                                                          options:0
-                                                                            error:&error];
+    NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:pat
+                                                                        options:0
+                                                                          error:&error];
     if (re == nil) {
-        NSLog(@"BrainEngine: bad token_pattern: %@", error);
+        NSLog(@"BrainEngine: bad token_pattern '%@': %@", _tokenPattern, error);
         return @[];
     }
     NSMutableArray<NSString *> *out = [NSMutableArray array];
@@ -149,10 +167,13 @@
 }
 
 - (nullable NSString *)predictIntent:(NSString *)text {
-    if (_model == nil || text.length == 0) {
+    if (text.length == 0) {
         return nil;
     }
-    [self loadVocabularyIfNeeded];
+    [self loadModelIfNeeded];
+    if (_model == nil) {
+        return nil;
+    }
     MLMultiArray *features = [self featureVectorForText:text];
     if (features == nil) {
         return nil;
@@ -174,16 +195,19 @@
         return nil;
     }
 
-    NSArray<NSString *> *names = @[ @"intent", @"classLabel", @"label" ];
-    for (NSString *name in names) {
+    NSDictionary<NSString *, MLFeatureDescription *> *byName =
+        _model.modelDescription.outputDescriptionsByName;
+    for (NSString *name in byName) {
         MLFeatureValue *value = [output featureValueForName:name];
-        if (value == nil) {
+        if (value == nil || value.type != MLFeatureTypeString) {
             continue;
         }
-        if (value.type == MLFeatureTypeString) {
-            return value.stringValue;
+        NSString *s = value.stringValue;
+        if (s.length > 0) {
+            return s;
         }
     }
+    NSLog(@"BrainEngine: no string class label in model outputs: %@", byName.allKeys);
     return nil;
 }
 
