@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 import coremltools as ct
-import numpy as np
+from coremltools.models.datatypes import Array
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 
@@ -102,10 +102,10 @@ def main() -> None:
     if int(clf.coef_.shape[1]) != n_features:
         raise RuntimeError("Classifier feature count does not match vectorizer output")
 
-    input_tensor = ct.TensorType(shape=(n_features,), dtype=np.float32)
+    input_features = [("features", Array(n_features))]
     mlmodel = ct.converters.sklearn.convert(
         clf,
-        input_features=[("features", input_tensor)],
+        input_features=input_features,
         output_feature_names="intent",
     )
     mlmodel.author = "AIApp train_brain.py"
