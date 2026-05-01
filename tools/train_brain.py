@@ -93,7 +93,8 @@ def main() -> None:
 
     vec = CountVectorizer(max_features=256, ngram_range=(1, 2))
     X = vec.fit_transform(list(texts))
-    clf = LogisticRegression(max_iter=500, random_state=0)
+    # coremltools only supports sklearn One-vs-Rest (not multinomial multiclass).
+    clf = LogisticRegression(max_iter=500, random_state=0, multi_class="ovr")
     clf.fit(X, list(labels))
 
     feature_names = vec.get_feature_names_out()
