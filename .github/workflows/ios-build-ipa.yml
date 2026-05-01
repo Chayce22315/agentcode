@@ -1,0 +1,81 @@
+name: iOS build (unsigned IPA)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Train brain (Python → Core ML) and compile for iOS
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv-brain
+          source .venv-brain/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r brain/requirements.txt
+          python tools/train_brain.py --out-dir AIApp/AIApp/Resources
+
+      - name: Upload trained brain artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-brain
+          path: |
+            AIApp/AIApp/Resources/Brain.mlpackage
+            AIApp/AIApp/Resources/Brain.mlmodelc
+            AIApp/AIApp/Resources/brain_vocab.json
+            AIApp/AIApp/Resources/brain_responses.json
+
+      - name: Build unsigned app (device, generic iOS)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project AIApp/AIApp.xcodeproj \
+            -scheme AIApp \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Verify brain inside built app
+        run: |
+          set -euo pipefail
+          APP="build/DerivedData/Build/Products/Release-iphoneos/AIApp.app"
+          test -d "${APP}/Brain.mlmodelc"
+          test -f "${APP}/brain_vocab.json"
+          test -f "${APP}/brain_responses.json"
+          ls -la "${APP}/Brain.mlmodelc" "${APP}/brain_vocab.json" "${APP}/brain_responses.json"
+
+      - name: Package IPA (manual Payload zip)
+        run: |
+          set -euo pipefail
+          APP="build/DerivedData/Build/Products/Release-iphoneos/AIApp.app"
+          test -d "$APP"
+          chmod +x tools/package-ipa.sh
+          ./tools/package-ipa.sh "$APP" "AIApp-unsigned.ipa"
+          shasum -a 256 AIApp-unsigned.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AIApp-unsigned-ipa
+          path: AIApp-unsigned.ipa

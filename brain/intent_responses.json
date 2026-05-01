@@ -1,0 +1,5 @@
+{
+  "responses": {
+    "greeting": "Hey! Ask me to write code or explain something — routing runs on-device via Core ML."
+  }
+}
