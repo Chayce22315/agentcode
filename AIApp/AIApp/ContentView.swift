@@ -1,12 +1,11 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var brain = ChatBrain()
     @State private var messages: [ChatMessage] = [
-        ChatMessage(role: .assistant, text: "Hi — I’m your assistant UI. Connect a model later to get real replies."),
-        ChatMessage(role: .user, text: "Show me a sample conversation layout."),
         ChatMessage(
             role: .assistant,
-            text: "You’ll see bubbles, timestamps, and a composer. Sending adds a message locally for now."
+            text: "Hi — I’m powered by a tiny Python-trained Core ML model, run through Objective-C (BrainEngine). Ask for code or explanations."
         )
     ]
     @State private var draft: String = ""
@@ -52,6 +51,8 @@ struct ContentView: View {
         let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         messages.append(ChatMessage(role: .user, text: trimmed))
+        let reply = brain.reply(to: trimmed)
+        messages.append(ChatMessage(role: .assistant, text: reply))
         draft = ""
     }
 }

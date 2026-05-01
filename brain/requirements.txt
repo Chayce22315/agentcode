@@ -1,0 +1,4 @@
+# Pins for coremltools sklearn converter on macOS CI (sklearn 1.6+ breaks older coremltools).
+scikit-learn>=1.3.0,<1.6.0
+coremltools>=7.0,<9.0
+joblib>=1.3.0

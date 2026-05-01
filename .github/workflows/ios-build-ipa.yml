@@ -18,6 +18,24 @@ jobs:
         with:
           xcode-version: '15.4'
 
+      - name: Train brain (Python → Core ML) and compile for iOS
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv-brain
+          source .venv-brain/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r brain/requirements.txt
+          python tools/train_brain.py --out-dir AIApp/AIApp/Resources
+
+      - name: Upload trained brain artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-brain
+          path: |
+            AIApp/AIApp/Resources/Brain.mlpackage
+            AIApp/AIApp/Resources/Brain.mlmodelc
+            AIApp/AIApp/Resources/brain_responses.json
+
       - name: Build unsigned app (device, generic iOS)
         run: |
           set -euo pipefail

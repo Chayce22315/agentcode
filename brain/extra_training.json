@@ -1,0 +1,6 @@
+{
+  "examples": [
+    { "text": "print hello in rust", "intent": "code" },
+    { "text": "what is a struct in swift", "intent": "explain" }
+  ]
+}

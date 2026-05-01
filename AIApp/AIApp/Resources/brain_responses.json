@@ -1,0 +1,8 @@
+{
+  "intents": {
+    "greeting": "Hi! I’m a tiny on-device brain (logistic regression over word counts). Ask for code or explanations.",
+    "explain": "Short take: break the idea into steps, try a minimal example, then extend. If you want a concrete snippet, ask “write code for …”.",
+    "code": "Minimal Python hello world:\n\nprint(\"hello, world\")\n\nAsk something more specific and I’ll still route this as the code intent."
+  },
+  "labels": ["code", "explain", "greeting"]
+}

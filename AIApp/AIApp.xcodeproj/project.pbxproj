@@ -11,6 +11,10 @@
 		A10000010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000002 /* ContentView.swift */; };
 		A10000010000000000000003 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000003 /* Message.swift */; };
 		A10000010000000000000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000004 /* Assets.xcassets */; };
+		A10000010000000000000005 /* ChatBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000007 /* ChatBrain.swift */; };
+		A10000010000000000000006 /* BrainEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000006 /* BrainEngine.m */; };
+		A10000010000000000000007 /* CoreML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000010000000000000009 /* CoreML.framework */; };
+		A10000010000000000000008 /* brain_responses.json in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000008 /* brain_responses.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +22,11 @@
 		A20000010000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A20000010000000000000003 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		A20000010000000000000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A20000010000000000000005 /* BrainEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BrainEngine.h; sourceTree = "<group>"; };
+		A20000010000000000000006 /* BrainEngine.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BrainEngine.m; sourceTree = "<group>"; };
+		A20000010000000000000007 /* ChatBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBrain.swift; sourceTree = "<group>"; };
+		A20000010000000000000008 /* brain_responses.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = brain_responses.json; sourceTree = "<group>"; };
+		A20000010000000000000009 /* CoreML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreML.framework; path = System/Library/Frameworks/CoreML.framework; sourceTree = SDKROOT; };
 		A30000010000000000000001 /* AIApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -26,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000010000000000000007 /* CoreML.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,7 +56,11 @@
 				A20000010000000000000001 /* AIAppApp.swift */,
 				A20000010000000000000002 /* ContentView.swift */,
 				A20000010000000000000003 /* Message.swift */,
+				A20000010000000000000007 /* ChatBrain.swift */,
+				A20000010000000000000005 /* BrainEngine.h */,
+				A20000010000000000000006 /* BrainEngine.m */,
 				A20000010000000000000004 /* Assets.xcassets */,
+				A50000010000000000000004 /* Resources */,
 			);
 			path = AIApp;
 			sourceTree = "<group>";
@@ -59,6 +73,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A50000010000000000000004 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000008 /* brain_responses.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -69,6 +91,7 @@
 				A80000010000000000000001 /* Sources */,
 				A40000010000000000000001 /* Frameworks */,
 				A90000010000000000000001 /* Resources */,
+				AC0000010000000000000001 /* Copy Brain.mlmodelc into bundle */,
 			);
 			buildRules = (
 			);
@@ -91,6 +114,7 @@
 				TargetAttributes = {
 					A60000010000000000000001 = {
 						CreatedOnToolsVersion = 15.0;
+						LastSwiftMigration = 1500;
 					};
 				};
 			};
@@ -118,10 +142,32 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000010000000000000004 /* Assets.xcassets in Resources */,
+				A10000010000000000000008 /* brain_responses.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AC0000010000000000000001 /* Copy Brain.mlmodelc into bundle */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Brain.mlmodelc into bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nRES=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nmkdir -p \"${RES}\"\nSRC=\"${SRCROOT}/AIApp/Resources\"\nif [ -d \"${SRC}/Brain.mlmodelc\" ]; then\n  rm -rf \"${RES}/Brain.mlmodelc\"\n  cp -R \"${SRC}/Brain.mlmodelc\" \"${RES}/\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A80000010000000000000001 /* Sources */ = {
@@ -131,6 +177,8 @@
 				A10000010000000000000001 /* AIAppApp.swift in Sources */,
 				A10000010000000000000002 /* ContentView.swift in Sources */,
 				A10000010000000000000003 /* Message.swift in Sources */,
+				A10000010000000000000005 /* ChatBrain.swift in Sources */,
+				A10000010000000000000006 /* BrainEngine.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,10 +308,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI App";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -281,6 +331,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = AIApp/AIApp-Bridging-Header.h;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -290,10 +341,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI App";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -311,6 +364,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = AIApp/AIApp-Bridging-Header.h;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
