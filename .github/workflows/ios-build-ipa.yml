@@ -56,6 +56,15 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
+      - name: Verify brain inside built app
+        run: |
+          set -euo pipefail
+          APP="build/DerivedData/Build/Products/Release-iphoneos/AIApp.app"
+          test -d "${APP}/Brain.mlmodelc"
+          test -f "${APP}/brain_vocab.json"
+          test -f "${APP}/brain_responses.json"
+          ls -la "${APP}/Brain.mlmodelc" "${APP}/brain_vocab.json" "${APP}/brain_responses.json"
+
       - name: Package IPA (manual Payload zip)
         run: |
           set -euo pipefail
