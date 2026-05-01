@@ -18,6 +18,11 @@ jobs:
         with:
           xcode-version: '15.4'
 
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Train brain (Python → Core ML) and compile for iOS
         run: |
           set -euo pipefail
@@ -34,6 +39,7 @@ jobs:
           path: |
             AIApp/AIApp/Resources/Brain.mlpackage
             AIApp/AIApp/Resources/Brain.mlmodelc
+            AIApp/AIApp/Resources/brain_vocab.json
             AIApp/AIApp/Resources/brain_responses.json
 
       - name: Build unsigned app (device, generic iOS)

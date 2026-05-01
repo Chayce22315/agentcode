@@ -165,7 +165,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nRES=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nmkdir -p \"${RES}\"\nSRC=\"${SRCROOT}/AIApp/Resources\"\nif [ -d \"${SRC}/Brain.mlmodelc\" ]; then\n  rm -rf \"${RES}/Brain.mlmodelc\"\n  cp -R \"${SRC}/Brain.mlmodelc\" \"${RES}/\"\nfi\n";
+			shellScript = "set -e\nRES=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nmkdir -p \"${RES}\"\nSRC=\"${SRCROOT}/AIApp/Resources\"\nif [ -d \"${SRC}/Brain.mlmodelc\" ]; then\n  rm -rf \"${RES}/Brain.mlmodelc\"\n  cp -R \"${SRC}/Brain.mlmodelc\" \"${RES}/\"\nfi\nif [ -f \"${SRC}/brain_vocab.json\" ]; then\n  cp \"${SRC}/brain_vocab.json\" \"${RES}/\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
